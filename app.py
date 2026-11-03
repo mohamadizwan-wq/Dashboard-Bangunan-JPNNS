@@ -11,7 +11,16 @@ from build_dashboard import extract
 
 ROOT = Path(__file__).resolve().parent
 st.set_page_config(page_title="Dashboard Aset Bangunan JPNS", page_icon=str(ROOT / "logo.jpg"), layout="wide", initial_sidebar_state="collapsed")
-st.markdown("<style>.block-container{padding:1rem;max-width:1800px}</style>", unsafe_allow_html=True)
+st.markdown("""<style>
+/* The dashboard owns scrolling; its frame fills the browser viewport. */
+[data-testid="stAppViewContainer"], .stApp {background:#f3f6f2;}
+[data-testid="stHeader"] {display:none;}
+.block-container {padding:0!important;max-width:none!important;}
+iframe[title="st.iframe"] {
+    position:fixed;inset:0;width:100%!important;height:100dvh!important;
+    border:0;display:block;
+}
+</style>""", unsafe_allow_html=True)
 
 @st.cache_data(show_spinner=False)
 def load_dashboard(source_bytes, template, logo_bytes):
@@ -21,6 +30,7 @@ def load_dashboard(source_bytes, template, logo_bytes):
     # A deployed file's modification time is not the date of its data collection.
     template = template.replace("$('updated').textContent='Tarikh fail: '+DATA.modified;", "$('updated').textContent='Versi data: ' + DATA.version;")
     template = template.replace("<br>Waktu Malaysia", "")
+    template = template.replace("max-width:1800px", "max-width:none")
     template = template.replace("Paparan berdasarkan salinan data semasa dashboard dijana. Jalankan Kemas_Kini_Dashboard.ps1 selepas mengubah Excel.", "Data terbuka untuk paparan awam. Maklumat berdasarkan fail Excel yang terakhir diterbitkan oleh pentadbir.")
     payload['version'] = hashlib.sha256(source_bytes).hexdigest()[:8]
     return template.replace('__PAYLOAD__', json.dumps(payload, ensure_ascii=True).replace('</', '<\\/'))
