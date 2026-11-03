@@ -1,6 +1,7 @@
 """Public Streamlit host for the JPNS interactive building dashboard."""
 import base64
 import json
+import re
 from pathlib import Path
 
 import streamlit as st
@@ -34,6 +35,9 @@ def load_dashboard(source_bytes, template, logo_bytes):
     template = template.replace('<span id="updated"></span>', '<span id="updated"></span><br>Developer: Seksyen Kejuruteraan')
     for title in ("Portfolio aset bangunan", "Taburan mengikut kategori", "Keadaan & penggunaan", "Daerah pentadbiran", "Daftar aset bangunan", "Ringkasan portfolio", "Semakan data sumber", "Jumlah aset", "Keadaan baik", "Rosak / selenggara", "Carian aset", "Daerah sivil", "Kategori aset", "Keadaan aset"):
         template = template.replace(title, title.title())
+    template = template.replace("Keadaan & Penggunaan", "Keadaan")
+    template = template.replace("Keadaan Baik tidak semestinya sedang digunakan.", "Ringkasan keadaan aset berdasarkan rekod semasa.")
+    template = re.sub(r",\['Rujukan Excel',`[^`]*`\]", "", template)
     template = template.replace("max-width:1800px", "max-width:none")
     template = template.replace("Paparan berdasarkan salinan data semasa dashboard dijana. Jalankan Kemas_Kini_Dashboard.ps1 selepas mengubah Excel.", "Data terbuka untuk paparan awam. Maklumat berdasarkan fail Excel yang terakhir diterbitkan oleh pentadbir.")
     payload['version'] = '1.0'
