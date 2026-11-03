@@ -1,6 +1,5 @@
 """Public Streamlit host for the JPNS interactive building dashboard."""
 import base64
-import hashlib
 import json
 from pathlib import Path
 
@@ -28,11 +27,16 @@ def load_dashboard(source_bytes, template, logo_bytes):
     records, incomplete = extract(BytesIO(source_bytes))
     payload = dict(records=records, incomplete=incomplete, modified="", logo="data:image/jpeg;base64," + base64.b64encode(logo_bytes).decode())
     # A deployed file's modification time is not the date of its data collection.
-    template = template.replace("$('updated').textContent='Tarikh fail: '+DATA.modified;", "$('updated').textContent='Versi data: ' + DATA.version;")
+    template = template.replace("$('updated').textContent='Tarikh fail: '+DATA.modified;", "$('updated').textContent='Versi Data: ' + DATA.version;")
     template = template.replace("<br>Waktu Malaysia", "")
+    template = template.replace("Sumber: data.xlsx", "Sumber: Seksyen Kejuruteraan")
+    template = template.replace("['Tidak digunakan',unused", "['Tidak Digunakan',unused")
+    template = template.replace('<span id="updated"></span>', '<span id="updated"></span><br>Developer: Seksyen Kejuruteraan')
+    for title in ("Portfolio aset bangunan", "Taburan mengikut kategori", "Keadaan & penggunaan", "Daerah pentadbiran", "Daftar aset bangunan", "Ringkasan portfolio", "Semakan data sumber", "Jumlah aset", "Keadaan baik", "Rosak / selenggara", "Carian aset", "Daerah sivil", "Kategori aset", "Keadaan aset"):
+        template = template.replace(title, title.title())
     template = template.replace("max-width:1800px", "max-width:none")
     template = template.replace("Paparan berdasarkan salinan data semasa dashboard dijana. Jalankan Kemas_Kini_Dashboard.ps1 selepas mengubah Excel.", "Data terbuka untuk paparan awam. Maklumat berdasarkan fail Excel yang terakhir diterbitkan oleh pentadbir.")
-    payload['version'] = hashlib.sha256(source_bytes).hexdigest()[:8]
+    payload['version'] = '1.0'
     return template.replace('__PAYLOAD__', json.dumps(payload, ensure_ascii=True).replace('</', '<\\/'))
 
 try:
