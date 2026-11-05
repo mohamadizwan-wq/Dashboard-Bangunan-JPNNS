@@ -38,6 +38,20 @@ def load_dashboard(source_bytes, template, logo_bytes):
     template = template.replace("Keadaan & Penggunaan", "Keadaan")
     template = template.replace("Keadaan Baik tidak semestinya sedang digunakan.", "Ringkasan keadaan aset berdasarkan rekod semasa.")
     template = re.sub(r",\['Rujukan Excel',`[^`]*`\]", "", template)
+    # Refresh dependent options for both dropdown changes and chart clicks.
+    dependent_filters = """
+function syncAdminOptions(){
+    const admin=$('admin').value;
+    const records=DATA.records.filter(r=>!admin||(r.admin||'Tidak dinyatakan')===admin);
+    ['civil','category'].forEach(field=>{
+        const selected=$(field).value;
+        const options=Object.keys(count(records,field)).sort();
+        $(field).innerHTML='<option value="">Semua</option>'+options.map(value=>`<option value="${esc(value)}">${esc(value)}</option>`).join('');
+        $(field).value=options.includes(selected)?selected:'';
+    });
+}
+"""
+    template = template.replace('function render(){', dependent_filters + 'function render(){syncAdminOptions();')
     template = template.replace("max-width:1800px", "max-width:none")
     template = template.replace("Paparan berdasarkan salinan data semasa dashboard dijana. Jalankan Kemas_Kini_Dashboard.ps1 selepas mengubah Excel.", "Data terbuka untuk paparan awam. Maklumat berdasarkan fail Excel yang terakhir diterbitkan oleh pentadbir.")
     payload['version'] = '1.0'
